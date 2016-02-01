@@ -1,0 +1,59 @@
+TODO LIST
+-Connection: UDP
+-Send package on broadcast address to find other Client
+   - Listening Thread (Use Port 9001) if HEL received show name of other client and save IP, for later connection
+   - Send Broadcast packet (x.x.x.255; on port 9001) every minute until ANSWER packet received (Timer Thread)
+
+SIMPLE PROTOCOL
+-structure: PROTOCOL;MESSAGE
+   - HELLO;name (simple HELlo with own name)
+   - ANSWER;[{ip,name,status}] (simple ANSwer on broadcast packet, with own tuplelist)
+   - INFORM;streamname (broadcast to known IPs)
+   - SUBSCRIBE;streamname (broadcast to known IPs)
+   - UNSUBSCRIBE (broadcast to known IPs)
+
+
+[{ip,name,status}] :
+[
+{ip:192.168.2.123, name:Marc, status: streaming:streamname},
+{ip:192.168.2.124, name:Philipp, status: subscribed:streamname}
+]
+
+jobs to do after receiving pakets:
+HELLO: send own list via ANSWER paket
+
+ANSWER: build into own list and look if own list contains any IPs which are not in the received list and resend ANSWER
+
+INFORM: set status in own triple list
+
+SUBSCRIBE: if(streamer == me) start RPS stream to that IP (on Port 9001)
+                     else update triple list
+
+UNSUBSCRIBE: if(streamer == me) stop RPS stream to that IP
+                     else update triple list
+
+PORTS:
+- RTP: 9002
+- Communication: 9001
+
+
+Content:
+    Audio / Video (UDP)
+    Files (TCP, later)
+
+advanced stuff:
+- distribute rtp sending to lower workload
+- downscale video / audio to lower workload
+
+LINKS:
+http://stackoverflow.com/questions/22073970/how-to-embed-vlc-media-player-to-my-android-app
+https://wiki.videolan.org/AndroidCompile
+http://androidsourcecode.blogspot.de/2013/10/android-rtp-sample-receiving-via-vlc.html
+http://code.tutsplus.com/tutorials/streaming-video-in-android-apps--cms-19888
+https://code.google.com/archive/p/ipcamera-for-android/
+https://github.com/fyhertz/libstreaming/
+
+
+v1
+Online ToDo-List (live, mit Uniqe-LINK)
+
