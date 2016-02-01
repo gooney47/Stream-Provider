@@ -1,15 +1,30 @@
 package com.example.stream_provider;
 
+import android.content.Context;
+import android.net.DhcpInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class MainActivity extends AppCompatActivity {
+
+    public static final int SERVER_PORT = 9001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +41,20 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        UDPListeningThread udpListeningThread = new UDPListeningThread();
+        udpListeningThread.runThread(getApplicationContext());
+        Log.d("Stream-Provider", "Started UDP Listening Thread.");
+        ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor();
+
+        worker.scheduleAtFixedRate(new HelloThread(getApplicationContext()),
+                0,  //initial delay
+                5, //run every x seconds
+                TimeUnit.SECONDS);
+        Log.d("Stream-Provider", "Started Hello Thread.");
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
