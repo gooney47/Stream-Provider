@@ -16,53 +16,16 @@ import java.util.Enumeration;
 
 public class HelloThread implements Runnable {
     private final static int INTERVAL = 1000 * 60 * 1; //1 minutes
-    private Context context = null;
+    private final SendingClient sendingClient;
+    private final String name;
 
-    public HelloThread(Context context) {
-        this.context = context;
+    public HelloThread(SendingClient sendingClient, String name) {
+        this.sendingClient = sendingClient;
+        this.name = name;
     }
 
     @Override
     public void run() {
-        String message = "HELLO;test\n";
-
-        try {
-            DatagramSocket datagramSocket = new DatagramSocket();
-            DatagramPacket dp;
-            dp = new DatagramPacket(message.getBytes(), message.length(), getBroadcastAddress(), MainActivity.SERVER_PORT);
-            datagramSocket.setBroadcast(true);
-            datagramSocket.send(dp);
-            Log.d("Stream-Provider", "Sent broadcast message.");
-        }
-        catch (Exception e) {
-            Log.e("Stream-Provider", "lmao", e);
-        }
-    }
-
-    private InetAddress getBroadcastAddress() throws IOException {
-        WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        DhcpInfo dhcp = wifi.getDhcpInfo();
-        // handle null somehow
-
-        int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
-        byte[] quads = new byte[4];
-        for (int k = 0; k < 4; k++)
-            quads[k] = (byte) (broadcast >> (k * 8));
-        return InetAddress.getByAddress(quads);
-    }
-    public String getLocalIpAddress() {
-        try {
-            for (Enumeration<NetworkInterface> en = NetworkInterface
-                    .getNetworkInterfaces(); en.hasMoreElements();) {
-                NetworkInterface intf = en.nextElement();
-                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
-                    InetAddress inetAddress = enumIpAddr.nextElement();
-                    if (!inetAddress.isLoopbackAddress()) {
-                        return inetAddress.getHostAddress().toString();
-                    }
-                }
-            }
-        } catch (SocketException ex) {}
-        return null;
+        sendingClient.sendHello(name);
     }
 }

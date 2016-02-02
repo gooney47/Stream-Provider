@@ -18,13 +18,16 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final int SERVER_PORT = 9001;
+    public static final int SERVER_PORT = 42312;
+    private ArrayList<Triple> userList = new ArrayList<Triple>();
+    private String username = "Max";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,12 +45,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        UDPListeningThread udpListeningThread = new UDPListeningThread();
-        udpListeningThread.runThread(getApplicationContext());
-        Log.d("Stream-Provider", "Started UDP Listening Thread.");
-        ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor();
+        userList.add(new Triple(username, Utils.getIPAddress(true), "idle"));
 
-        worker.scheduleAtFixedRate(new HelloThread(getApplicationContext()),
+        SendingClient sendingClient = new SendingClient(getApplicationContext());
+        ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor();
+        UDPListeningThread udpListeningThread = new UDPListeningThread();
+        udpListeningThread.runThread(getApplicationContext(), userList, worker, sendingClient);
+        Log.d("Stream-Provider", "Started UDP Listening Thread.");
+
+
+        worker.scheduleAtFixedRate(new HelloThread(sendingClient, username),
                 0,  //initial delay
                 5, //run every x seconds
                 TimeUnit.SECONDS);

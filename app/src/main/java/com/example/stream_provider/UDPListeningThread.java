@@ -2,22 +2,37 @@ package com.example.stream_provider;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.util.ArrayList;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class UDPListeningThread
 {
     private AsyncTask<Void, Void, Void> async;
     private boolean running = true;
     private Context applicationContext = null;
+    private WifiManager.MulticastLock multicastLock;
 
-    public void runThread(Context context)
+    public void runThread(final Context context, final ArrayList<Triple> userList, final ScheduledExecutorService worker, final SendingClient sendingClient)
     {
+        WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        multicastLock = wifi.createMulticastLock("multicastLock");
+        multicastLock.setReferenceCounted(false);
+        multicastLock.acquire();
+
         applicationContext = context;
         async = new AsyncTask<Void, Void, Void>()
         {
@@ -26,26 +41,70 @@ public class UDPListeningThread
             {
                 byte[] lMsg = new byte[4096];
                 DatagramPacket datagramPacket = new DatagramPacket(lMsg, lMsg.length);
-                DatagramSocket datagramSocket = null;
+                MulticastSocket socket = null;
+                try {
+                    socket = new MulticastSocket(MainActivity.SERVER_PORT);
+                    InetAddress group = Utils.getBroadcastAddress(context);
+                    socket.joinGroup(group);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
 
                 try
                 {
-                    datagramSocket = new DatagramSocket(MainActivity.SERVER_PORT);
+                    //datagramSocket = new DatagramSocket(MainActivity.SERVER_PORT);
                     Log.d("Stream-Provider", "Listening on port 9001 for incoming UDP packets.");
 
                     while(running)
                     {
-                        Log.d("Stream-Provider", "waiting for new UDP packet");
-                        datagramSocket.receive(datagramPacket);
+                        socket.receive(datagramPacket);
                         String protocol = new String(datagramPacket.getData()).split("\n")[0].split(";")[0];
                         String msg = new String(datagramPacket.getData()).split("\n")[0].split(";")[1];
+                        String ip = datagramPacket.getAddress().getHostAddress();
                         switch (protocol) {
                             case "HELLO":
+                                Utils.log("Received hello from: " + ip);
                                 String name = msg;
-                                String ip = datagramPacket.getAddress().toString();
+                                if (!ip.equals(Utils.getIPAddress(true))) {
+                                    boolean alreadyContained = false;
+                                    for (Triple t : userList) {
+                                        if (t.ip.equals(ip)) alreadyContained = true;
+                                    }
+                                    if (!alreadyContained) {
+                                        userList.add(new Triple(name, ip, Triple.STATUS_IDLE));
+                                    }
+                                    sendingClient.sendAnswer(userList, datagramPacket.getAddress().getHostAddress());
+                                }
                                 break;
                             case "ANSWER":
+                                Utils.log("Received answer from: " + ip);
+                                JSONArray userArray = new JSONArray(msg);
+                                // add all entries which are not contained in the own userlist
+                                for (int i = 0; i < userArray.length(); i++) {
+                                    JSONObject jsonObject = userArray.getJSONObject(i);
+                                    String currIp = jsonObject.getString("ip");
+                                    boolean alreadyContained = false;
+                                    for (Triple t: userList) {
+                                        if (t.ip.equals(currIp)) alreadyContained = true;
+                                    }
+                                    if (!alreadyContained) userList.add(new Triple(jsonObject.getString("name"), jsonObject.getString("ip"), jsonObject.getString("status")));
+                                }
+                                // check if own userlist contains any users which are not contained in the received list and resend a hello to share them
+                                for (int i = 0; i < userList.size(); i++) {
+                                    String currIp = userList.get(i).ip;
+                                    boolean alreadyContained = false;
+                                    for (int j = 0; j < userArray.length(); j++) {
+                                        JSONObject jsonObject = userArray.getJSONObject(j);
+                                        if (jsonObject.getString("ip").equals(currIp)) alreadyContained = true;
+                                    }
+                                    if (!alreadyContained) sendingClient.sendAnswer(userList, ip);
+                                }
 
+                                worker.shutdown();
+
+                                Utils.log("Stopped hello thread and updated userlist:");
+                                Utils.printUserList(userList);
                                 break;
                             case "INFORM":
 
@@ -64,13 +123,13 @@ public class UDPListeningThread
                 }
                 catch (Exception e)
                 {
-                    e.printStackTrace();
+                    Log.e("Stream-Provider", e.getMessage());
                 }
                 finally
                 {
-                    if (datagramSocket != null)
+                    if (socket != null)
                     {
-                        datagramSocket.close();
+                        socket.close();
                     }
                 }
 
@@ -84,6 +143,10 @@ public class UDPListeningThread
 
     public void stopThread()
     {
+        if (multicastLock != null) {
+            multicastLock.release();
+            multicastLock = null;
+        }
         running = false;
     }
 }
