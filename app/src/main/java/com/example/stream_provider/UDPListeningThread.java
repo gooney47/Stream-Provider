@@ -70,6 +70,10 @@ public class UDPListeningThread
                             @Override
                             public void run() {((TextView) mainActivity.findViewById(R.id.textField)).setText("Multicast works!");}
                         };
+                        Runnable listViewUpdateRunnable = new Runnable() {
+                            @Override
+                            public void run() {mainActivity.updateListView();}
+                        };
                         switch (protocol) {
                             case "HELLO":
                                 String name = msg;
@@ -111,7 +115,10 @@ public class UDPListeningThread
                                     if (!alreadyContained) sendingClient.sendAnswer(userList, ip);
                                 }
 
+                                mainHandler.post(listViewUpdateRunnable);
+
                                 worker.shutdown();
+
 
                                 Utils.log("Stopped hello thread and updated userlist:");
                                 Utils.printUserList(userList);

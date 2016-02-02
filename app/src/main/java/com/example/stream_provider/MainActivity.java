@@ -13,7 +13,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int SERVER_PORT = 42312;
     private ArrayList<Triple> userList = new ArrayList<Triple>();
     private String username = null;
+    private ArrayAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +49,10 @@ public class MainActivity extends AppCompatActivity {
 
         userList.add(new Triple(username, Utils.getIPAddress(true), "idle"));
 
+        adapter = new ArrayAdapter<String>(this, R.layout.listitem, getListViewStrings());
+        ListView listView = (ListView) findViewById(R.id.mobile_list);
+        listView.setAdapter(adapter);
+
         SendingClient sendingClient = new SendingClient(getApplicationContext());
         ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor();
         UDPListeningThread udpListeningThread = new UDPListeningThread();
@@ -58,6 +65,20 @@ public class MainActivity extends AppCompatActivity {
                 5, //run every x seconds
                 TimeUnit.SECONDS);
         Log.d("Stream-Provider", "Started Hello Thread.");
+    }
+
+    public void updateListView() {
+        adapter.clear();
+        adapter.addAll(getListViewStrings());
+        adapter.notifyDataSetChanged();
+    }
+
+    private ArrayList<String> getListViewStrings() {
+        ArrayList<String> list = new ArrayList<String>();
+        for (int i = 0; i < userList.size(); i++) {
+            list.add(userList.get(i).name + " (" + userList.get(i).ip + ") - " + userList.get(i).status);
+        }
+        return list;
     }
 
     private void askForUsername(boolean alwaysRequest) {
