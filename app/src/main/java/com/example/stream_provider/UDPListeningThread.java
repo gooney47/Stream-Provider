@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -26,7 +28,7 @@ public class UDPListeningThread
     private Context applicationContext = null;
     private WifiManager.MulticastLock multicastLock;
 
-    public void runThread(final Context context, final ArrayList<Triple> userList, final ScheduledExecutorService worker, final SendingClient sendingClient)
+    public void runThread(final Context context, final ArrayList<Triple> userList, final ScheduledExecutorService worker, final SendingClient sendingClient, final MainActivity mainActivity)
     {
         WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         multicastLock = wifi.createMulticastLock("multicastLock");
@@ -62,11 +64,18 @@ public class UDPListeningThread
                         String protocol = new String(datagramPacket.getData()).split("\n")[0].split(";")[0];
                         String msg = new String(datagramPacket.getData()).split("\n")[0].split(";")[1];
                         String ip = datagramPacket.getAddress().getHostAddress();
+                        Handler mainHandler = new Handler(context.getMainLooper());
+
+                        Runnable myRunnable = new Runnable() {
+                            @Override
+                            public void run() {((TextView) mainActivity.findViewById(R.id.textField)).setText("Multicast works!");}
+                        };
                         switch (protocol) {
                             case "HELLO":
-                                Utils.log("Received hello from: " + ip);
                                 String name = msg;
                                 if (!ip.equals(Utils.getIPAddress(true))) {
+                                    Utils.log("Received hello from: " + ip);
+                                    mainHandler.post(myRunnable);
                                     boolean alreadyContained = false;
                                     for (Triple t : userList) {
                                         if (t.ip.equals(ip)) alreadyContained = true;
@@ -76,6 +85,7 @@ public class UDPListeningThread
                                     }
                                     sendingClient.sendAnswer(userList, datagramPacket.getAddress().getHostAddress());
                                 }
+
                                 break;
                             case "ANSWER":
                                 Utils.log("Received answer from: " + ip);

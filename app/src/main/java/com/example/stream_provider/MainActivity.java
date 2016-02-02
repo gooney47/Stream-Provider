@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         SendingClient sendingClient = new SendingClient(getApplicationContext());
         ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor();
         UDPListeningThread udpListeningThread = new UDPListeningThread();
-        udpListeningThread.runThread(getApplicationContext(), userList, worker, sendingClient);
+        udpListeningThread.runThread(getApplicationContext(), userList, worker, sendingClient, this);
         Log.d("Stream-Provider", "Started UDP Listening Thread.");
 
 
