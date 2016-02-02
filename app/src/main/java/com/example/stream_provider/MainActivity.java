@@ -1,10 +1,10 @@
 package com.example.stream_provider;
 
-import android.content.Context;
-import android.net.DhcpInfo;
-import android.net.wifi.WifiManager;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -13,11 +13,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int SERVER_PORT = 42312;
     private ArrayList<Triple> userList = new ArrayList<Triple>();
-    private String username = "Max";
+    private String username = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        askForUsername(false);
+
         userList.add(new Triple(username, Utils.getIPAddress(true), "idle"));
 
         SendingClient sendingClient = new SendingClient(getApplicationContext());
@@ -61,6 +60,39 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Stream-Provider", "Started Hello Thread.");
     }
 
+    private void askForUsername(boolean alwaysRequest) {
+        final SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(this);
+        username = prefs.getString("user_name", null);
+        if (alwaysRequest || username == null) {
+            EditText input = new EditText(this);
+            input.setId(1000);
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setView(input).setTitle("Enter your username!")
+                    .setPositiveButton("Ok",
+                            new DialogInterface.OnClickListener() {
+
+                                @Override
+                                public void onClick(DialogInterface dialog,
+                                                    int which) {
+                                    EditText theInput = (EditText) ((AlertDialog) dialog)
+                                            .findViewById(1000);
+                                    String enteredText = theInput.getText()
+                                            .toString();
+                                    username = new String(enteredText);
+                                    if (!enteredText.equals("")) {
+                                        SharedPreferences.Editor editor = prefs
+                                                .edit();
+                                        editor.putString("user_name",
+                                                enteredText);
+                                        editor.apply();
+
+                                    }
+                                }
+                            }).create();
+            dialog.show();
+        }
+    }
 
 
     @Override
@@ -78,9 +110,11 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_changeusername) {
+            askForUsername(true);
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
