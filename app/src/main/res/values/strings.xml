@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Stream-Provider</string>
     <string name="action_changeusername">Change Username</string>
+    <string name="action_streamingtest">Test streaming</string>
+
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
 </resources>

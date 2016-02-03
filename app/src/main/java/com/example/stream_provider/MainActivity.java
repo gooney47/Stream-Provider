@@ -2,6 +2,7 @@ package com.example.stream_provider;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -17,6 +18,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+
+import com.example.stream_provider.streaming.StreamingTest;
 
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
@@ -148,6 +151,12 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_changeusername) {
             askForUsername(true);
+            return true;
+        }
+        //Start streaming test
+        else if (id == R.id.action_teststreaming) {
+            Intent intent = new Intent(this, StreamingTest.class);
+            startActivity(intent);
             return true;
         }
 
