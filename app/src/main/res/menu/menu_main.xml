@@ -7,4 +7,9 @@
         android:orderInCategory="100"
         android:title="@string/action_changeusername"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_teststreaming"
+        android:orderInCategory="200"
+        android:title="@string/action_streamingtest"
+        app:showAsAction="never" />
 </menu>
