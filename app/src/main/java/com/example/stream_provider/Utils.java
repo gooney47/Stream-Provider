@@ -4,6 +4,7 @@ package com.example.stream_provider;
 import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -162,5 +163,22 @@ public class Utils {
             jsonArray.put(jsonObject);
         }
         Utils.log(jsonArray.toString());
+    }
+
+    public static void showSnackbar (MainActivity activity, String text) {
+        Snackbar.make(activity.findViewById(android.R.id.content), text, Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
+    public static JSONObject tripleToJSON(Triple t) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("name", t.name);
+            jsonObject.put("ip", t.ip);
+            jsonObject.put("status", t.status);
+        } catch (JSONException e) {
+            Log.e("Stream-Provider", "lmao", e);
+        }
+        return jsonObject;
     }
 }

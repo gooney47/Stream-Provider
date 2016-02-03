@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Triple> userList = new ArrayList<Triple>();
     private String username = null;
     private ArrayAdapter adapter;
+    private boolean streaming = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,14 +38,28 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        final SendingClient sendingClient = new SendingClient(getApplicationContext());
+
+        Button streamingButton = (Button) findViewById(R.id.streaming_button);
+        streamingButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onClick(View v) {
+                if (!streaming) {
+                    streaming = true;
+                    ((Button) findViewById(R.id.streaming_button)).setText("End Streaming");
+                    userList.get(0).status = "streaming";
+                    sendingClient.sendInform(userList);
+                } else {
+                    streaming = false;
+                    ((Button) findViewById(R.id.streaming_button)).setText("Start Streaming");
+                    userList.get(0).status = "idle";
+                    sendingClient.sendInform(userList);
+                }
+                updateListView();
             }
         });
+
+        if (Utils.getIPAddress(true).equals(""))Utils.log("Not able to retrieve IP! Check Wifi connection");
 
         askForUsername(false);
 
@@ -53,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
         ListView listView = (ListView) findViewById(R.id.mobile_list);
         listView.setAdapter(adapter);
 
-        SendingClient sendingClient = new SendingClient(getApplicationContext());
         ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor();
         UDPListeningThread udpListeningThread = new UDPListeningThread();
         udpListeningThread.runThread(getApplicationContext(), userList, worker, sendingClient, this);

@@ -87,6 +87,9 @@ public class UDPListeningThread
                                     if (!alreadyContained) {
                                         userList.add(new Triple(name, ip, Triple.STATUS_IDLE));
                                     }
+
+                                    mainHandler.post(listViewUpdateRunnable);
+
                                     sendingClient.sendAnswer(userList, datagramPacket.getAddress().getHostAddress());
                                 }
 
@@ -124,7 +127,12 @@ public class UDPListeningThread
                                 Utils.printUserList(userList);
                                 break;
                             case "INFORM":
-
+                                Utils.log("received INFORM: " + msg);
+                                JSONObject jsonObject = new JSONObject(msg);
+                                for (int i = 0; i < userList.size(); i++) {
+                                    if (jsonObject.getString("ip").equals(userList.get(i).ip)) userList.get(i).status = jsonObject.getString("status");
+                                }
+                                mainHandler.post(listViewUpdateRunnable);
                                 break;
                             case "SUBSCRIBE":
 

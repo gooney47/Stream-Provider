@@ -35,17 +35,16 @@ public class SendingClient {
     public void sendAnswer(ArrayList<Triple> userList, String address) {
         JSONArray jsonArray = new JSONArray();
         for (Triple t: userList) {
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("name", t.name);
-                jsonObject.put("ip", t.ip);
-                jsonObject.put("status", t.status);
-            } catch (JSONException e) {
-                Log.e("Stream-Provider", "lmao", e);
-            }
-            jsonArray.put(jsonObject);
+            jsonArray.put(Utils.tripleToJSON(t));
         }
         new SendOperation().execute("ANSWER", jsonArray.toString(), address);
+    }
+
+    public void sendInform(ArrayList<Triple> userList) {
+        Utils.log(Utils.tripleToJSON(userList.get(0)).toString());
+        for (int i = 1; i < userList.size(); i++) {
+            new SendOperation().execute("INFORM", Utils.tripleToJSON(userList.get(0)).toString(), userList.get(i).ip);
+        }
     }
 
     class SendOperation extends AsyncTask<String, Void, String> {
