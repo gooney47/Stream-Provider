@@ -10,4 +10,9 @@ public class Triple {
         this.name = name;
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return this.name + " (" + this.ip + ") - " + this.status;
+    }
 }

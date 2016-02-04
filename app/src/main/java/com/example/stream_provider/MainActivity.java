@@ -11,9 +11,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,8 +33,9 @@ public class MainActivity extends AppCompatActivity {
     public static final int SERVER_PORT = 42312;
     private ArrayList<Triple> userList = new ArrayList<Triple>();
     private String username = null;
-    private ArrayAdapter adapter;
+    private ListAdapter adapter;
     private boolean streaming = false;
+    private SendingClient sendingClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final SendingClient sendingClient = new SendingClient(getApplicationContext());
+        sendingClient = new SendingClient(getApplicationContext());
 
         Button streamingButton = (Button) findViewById(R.id.streaming_button);
         streamingButton.setOnClickListener(new View.OnClickListener() {
@@ -68,9 +71,10 @@ public class MainActivity extends AppCompatActivity {
 
         userList.add(new Triple(username, Utils.getIPAddress(true), "idle"));
 
-        adapter = new ArrayAdapter<String>(this, R.layout.listitem, getListViewStrings());
+        adapter = new ListAdapter(this, R.layout.listitem, userList);
         ListView listView = (ListView) findViewById(R.id.mobile_list);
         listView.setAdapter(adapter);
+        registerForContextMenu(listView);
 
         ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor();
         UDPListeningThread udpListeningThread = new UDPListeningThread();
@@ -86,17 +90,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateListView() {
-        adapter.clear();
-        adapter.addAll(getListViewStrings());
         adapter.notifyDataSetChanged();
-    }
-
-    private ArrayList<String> getListViewStrings() {
-        ArrayList<String> list = new ArrayList<String>();
-        for (int i = 0; i < userList.size(); i++) {
-            list.add(userList.get(i).name + " (" + userList.get(i).ip + ") - " + userList.get(i).status);
-        }
-        return list;
     }
 
     private void askForUsername(boolean alwaysRequest) {
@@ -162,5 +156,35 @@ public class MainActivity extends AppCompatActivity {
 
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        if (v.getId() == R.id.mobile_list) {
+            ListView lv = (ListView) v;
+            AdapterView.AdapterContextMenuInfo acmi = (AdapterView.AdapterContextMenuInfo) menuInfo;
+            Triple t = (Triple) lv.getItemAtPosition(acmi.position);
+
+            if (t.status.equals("streaming")) {
+                menu.add("Subscribe");
+            }
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        Utils.log(item.getTitle().toString());
+        switch (item.getTitle().toString()) {
+            case "Subscribe":
+                int listPosition = info.position;
+                userList.get(0).status = userList.get(listPosition).name;
+                sendingClient.sendInform(userList);
+                updateListView();
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+
     }
 }
