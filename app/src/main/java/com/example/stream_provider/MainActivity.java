@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private ListAdapter adapter;
     private boolean streaming = false;
     private SendingClient sendingClient;
+    private Triple me;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         askForUsername(false);
 
         userList.add(new Triple(username, Utils.getIPAddress(true), "idle"));
+        me = userList.get(0);
 
         adapter = new ListAdapter(this, R.layout.listitem, userList);
         ListView listView = (ListView) findViewById(R.id.mobile_list);
@@ -165,9 +167,15 @@ public class MainActivity extends AppCompatActivity {
             AdapterView.AdapterContextMenuInfo acmi = (AdapterView.AdapterContextMenuInfo) menuInfo;
             Triple t = (Triple) lv.getItemAtPosition(acmi.position);
 
-            if (t.status.equals("streaming")) {
-                menu.add("Subscribe");
+            if (t != me) {
+                if (t.status.equals("streaming") && !me.status.equals(t.name)) {
+                    menu.add("Subscribe");
+                }
+                else if (me.status.equals(t.name)) {
+                    menu.add("Unsubscribe");
+                }
             }
+
         }
     }
 
@@ -179,6 +187,11 @@ public class MainActivity extends AppCompatActivity {
             case "Subscribe":
                 int listPosition = info.position;
                 userList.get(0).status = userList.get(listPosition).name;
+                sendingClient.sendInform(userList);
+                updateListView();
+                return true;
+            case "Unsubscribe":
+                userList.get(0).status = "idle";
                 sendingClient.sendInform(userList);
                 updateListView();
                 return true;

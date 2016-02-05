@@ -33,7 +33,7 @@ public class ListAdapter extends ArrayAdapter<Triple> {
         Triple t = getItem(position);
 
         if (t != null) {
-            TextView tv = (TextView) v.findViewById(R.id.listtextview);
+            TextView tv = (TextView) v.findViewById(R.id.streamertextview);
 
             if (tv != null) {
                 tv.setText(t.name + " (" + t.ip + ") - " + t.status);
