@@ -28,7 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     public static final int SERVER_PORT = 42312;
     private ArrayList<Triple> userList = new ArrayList<Triple>();
@@ -76,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         adapter = new ListAdapter(this, R.layout.listitem, userList);
         ListView listView = (ListView) findViewById(R.id.mobile_list);
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(this);
         registerForContextMenu(listView);
 
         ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor();
@@ -199,5 +200,10 @@ public class MainActivity extends AppCompatActivity {
                 return super.onContextItemSelected(item);
         }
 
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        this.openContextMenu(view);
     }
 }
