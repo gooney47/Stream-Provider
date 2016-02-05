@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class UDPListeningThread
             protected Void doInBackground(Void... params)
             {
                 byte[] lMsg = new byte[4096];
-                DatagramPacket datagramPacket = new DatagramPacket(lMsg, lMsg.length);
+                final DatagramPacket datagramPacket = new DatagramPacket(lMsg, lMsg.length);
                 MulticastSocket socket = null;
                 try {
                     socket = new MulticastSocket(MainActivity.SERVER_PORT);
@@ -62,20 +63,33 @@ public class UDPListeningThread
                     {
                         socket.receive(datagramPacket);
                         String protocol = new String(datagramPacket.getData()).split("\n")[0].split(";")[0];
-                        String msg = new String(datagramPacket.getData()).split("\n")[0].split(";")[1];
-                        String ip = datagramPacket.getAddress().getHostAddress();
-                        Handler mainHandler = new Handler(context.getMainLooper());
+                        final String msg = new String(datagramPacket.getData()).split("\n")[0].split(";")[1];
+                        final String ip = datagramPacket.getAddress().getHostAddress();
+                        final Handler mainHandler = new Handler(context.getMainLooper());
 
-                        Runnable myRunnable = new Runnable() {
+                        final Runnable myRunnable = new Runnable() {
                             @Override
                             public void run() {((TextView) mainActivity.findViewById(R.id.textField)).setText("Multicast works!");}
                         };
-                        Runnable listViewUpdateRunnable = new Runnable() {
+                        final Runnable informRunnable = new Runnable() {
                             @Override
-                            public void run() {mainActivity.updateListView();}
+                            public void run() {
+                                try {
+                                    Utils.log("received INFORM: " + msg);
+                                    JSONObject jsonObject = new JSONObject(msg);
+                                    for (int i = 0; i < userList.size(); i++) {
+                                        if (jsonObject.getString("ip").equals(userList.get(i).ip))
+                                            userList.get(i).status = jsonObject.getString("status");
+                                    }
+                                    mainActivity.updateListView();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         };
-                        switch (protocol) {
-                            case "HELLO":
+                        Runnable helloRunnable = new Runnable() {
+                            @Override
+                            public void run() {
                                 String name = msg;
                                 if (!ip.equals(Utils.getIPAddress(true))) {
                                     Utils.log("Received hello from: " + ip);
@@ -88,57 +102,58 @@ public class UDPListeningThread
                                         userList.add(new Triple(name, ip, Triple.STATUS_IDLE));
                                     }
 
-                                    mainHandler.post(listViewUpdateRunnable);
-
                                     sendingClient.sendAnswer(userList, datagramPacket.getAddress().getHostAddress());
                                 }
+                                mainActivity.updateListView();
+                            }
+                        };
+                        Runnable answerRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Utils.log("Received answer from: " + ip);
+                                    JSONArray userArray = new JSONArray(msg);
+                                    // add all entries which are not contained in the own userlist
+                                    for (int i = 0; i < userArray.length(); i++) {
+                                        JSONObject jsonObject = userArray.getJSONObject(i);
+                                        String currIp = jsonObject.getString("ip");
+                                        boolean alreadyContained = false;
+                                        for (Triple t: userList) {
+                                            if (t.ip.equals(currIp)) alreadyContained = true;
+                                        }
+                                        if (!alreadyContained) userList.add(new Triple(jsonObject.getString("name"), jsonObject.getString("ip"), jsonObject.getString("status")));
+                                    }
+                                    // check if own userlist contains any users which are not contained in the received list and resend a hello to share them
+                                    for (int i = 0; i < userList.size(); i++) {
+                                        String currIp = userList.get(i).ip;
+                                        boolean alreadyContained = false;
+                                        for (int j = 0; j < userArray.length(); j++) {
+                                            JSONObject jsonObject = userArray.getJSONObject(j);
+                                            if (jsonObject.getString("ip").equals(currIp)) alreadyContained = true;
+                                        }
+                                        if (!alreadyContained) sendingClient.sendAnswer(userList, ip);
+                                    }
+                                    mainActivity.updateListView();
+                                    worker.shutdown();
 
+
+                                    Utils.log("Stopped hello thread and updated userlist:");
+                                    Utils.printUserList(userList);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        };
+                        switch (protocol) {
+                            case "HELLO":
+                                mainHandler.post(helloRunnable);
                                 break;
                             case "ANSWER":
-                                Utils.log("Received answer from: " + ip);
-                                JSONArray userArray = new JSONArray(msg);
-                                // add all entries which are not contained in the own userlist
-                                for (int i = 0; i < userArray.length(); i++) {
-                                    JSONObject jsonObject = userArray.getJSONObject(i);
-                                    String currIp = jsonObject.getString("ip");
-                                    boolean alreadyContained = false;
-                                    for (Triple t: userList) {
-                                        if (t.ip.equals(currIp)) alreadyContained = true;
-                                    }
-                                    if (!alreadyContained) userList.add(new Triple(jsonObject.getString("name"), jsonObject.getString("ip"), jsonObject.getString("status")));
-                                }
-                                // check if own userlist contains any users which are not contained in the received list and resend a hello to share them
-                                for (int i = 0; i < userList.size(); i++) {
-                                    String currIp = userList.get(i).ip;
-                                    boolean alreadyContained = false;
-                                    for (int j = 0; j < userArray.length(); j++) {
-                                        JSONObject jsonObject = userArray.getJSONObject(j);
-                                        if (jsonObject.getString("ip").equals(currIp)) alreadyContained = true;
-                                    }
-                                    if (!alreadyContained) sendingClient.sendAnswer(userList, ip);
-                                }
-
-                                mainHandler.post(listViewUpdateRunnable);
-
-                                worker.shutdown();
-
-
-                                Utils.log("Stopped hello thread and updated userlist:");
-                                Utils.printUserList(userList);
+                                mainHandler.post(answerRunnable);
                                 break;
                             case "INFORM":
-                                Utils.log("received INFORM: " + msg);
-                                JSONObject jsonObject = new JSONObject(msg);
-                                for (int i = 0; i < userList.size(); i++) {
-                                    if (jsonObject.getString("ip").equals(userList.get(i).ip)) userList.get(i).status = jsonObject.getString("status");
-                                }
-                                mainHandler.post(listViewUpdateRunnable);
-                                break;
-                            case "SUBSCRIBE":
-
-                                break;
-                            case "UNSUBSCRIBE":
-
+                                mainHandler.post(informRunnable);
                                 break;
                             default:
                                 Log.d("Stream-Provider", "received packet with unknown protocol: prot: " + protocol + " msg: " + msg);
