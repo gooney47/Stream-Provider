@@ -48,7 +48,8 @@ public class UDPListeningThread
                 try {
                     socket = new MulticastSocket(MainActivity.SERVER_PORT);
                     InetAddress group = Utils.getBroadcastAddress(context);
-                    socket.joinGroup(group);
+                    byte[] address = {(byte)224, (byte)0, (byte)0, (byte)251};
+                    socket.joinGroup(InetAddress.getByAddress(address));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -145,6 +146,7 @@ public class UDPListeningThread
 
                             }
                         };
+                        // do listview stuff on ui thread to prevent eating exceptions
                         switch (protocol) {
                             case "HELLO":
                                 mainHandler.post(helloRunnable);
