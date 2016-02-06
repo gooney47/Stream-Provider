@@ -76,12 +76,16 @@ public class UDPListeningThread
                             @Override
                             public void run() {
                                 try {
-                                    Utils.log("received INFORM: " + msg);
                                     JSONObject jsonObject = new JSONObject(msg);
                                     for (int i = 0; i < userList.size(); i++) {
-                                        if (jsonObject.getString("ip").equals(userList.get(i).ip))
+                                        if (jsonObject.getString("ip").equals(userList.get(i).ip)) {
+                                            if (userList.get(i).status.equals(userList.get(0).name) && !jsonObject.getString("status").equals(userList.get(0).name)) mainActivity.userUnsubscribed(userList.get(i));
                                             userList.get(i).status = jsonObject.getString("status");
+                                            if (userList.get(i).status.equals(userList.get(0).name)) mainActivity.userSubscribed(userList.get(i));
+                                        }
+
                                     }
+
                                     mainActivity.updateListView();
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -93,7 +97,6 @@ public class UDPListeningThread
                             public void run() {
                                 String name = msg;
                                 if (!ip.equals(Utils.getIPAddress(true))) {
-                                    Utils.log("Received hello from: " + ip);
                                     mainHandler.post(myRunnable);
                                     boolean alreadyContained = false;
                                     for (Triple t : userList) {
@@ -112,7 +115,6 @@ public class UDPListeningThread
                             @Override
                             public void run() {
                                 try {
-                                    Utils.log("Received answer from: " + ip);
                                     JSONArray userArray = new JSONArray(msg);
                                     // add all entries which are not contained in the own userlist
                                     for (int i = 0; i < userArray.length(); i++) {

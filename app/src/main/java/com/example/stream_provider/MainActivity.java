@@ -183,7 +183,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        Utils.log(item.getTitle().toString());
         switch (item.getTitle().toString()) {
             case "Subscribe":
                 int listPosition = info.position;
@@ -205,5 +204,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         this.openContextMenu(view);
+    }
+
+    public void userSubscribed(Triple triple) {
+        Utils.log("New subscriber: " + triple.ip);
+    }
+
+    public void userUnsubscribed(Triple triple) {
+        Utils.log("User unsubscribed: " + triple.ip);
     }
 }

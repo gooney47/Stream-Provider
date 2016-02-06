@@ -162,7 +162,6 @@ public class Utils {
             }
             jsonArray.put(jsonObject);
         }
-        Utils.log(jsonArray.toString());
     }
 
     public static void showSnackbar (MainActivity activity, String text) {

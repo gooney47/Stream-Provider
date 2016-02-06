@@ -41,7 +41,6 @@ public class SendingClient {
     }
 
     public void sendInform(ArrayList<Triple> userList) {
-        Utils.log(Utils.tripleToJSON(userList.get(0)).toString());
         for (int i = 1; i < userList.size(); i++) {
             new SendOperation().execute("INFORM", Utils.tripleToJSON(userList.get(0)).toString(), userList.get(i).ip);
         }
