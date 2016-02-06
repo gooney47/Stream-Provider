@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import com.example.stream_provider.R;
+
 public class ListAdapter extends ArrayAdapter<Triple> {
 
     public ListAdapter(Context context, int textViewResourceId) {

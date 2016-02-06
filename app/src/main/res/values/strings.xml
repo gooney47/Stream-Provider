@@ -5,4 +5,17 @@
 
     <string name="start">Start</string>
     <string name="stop">Stop</string>
+
+    <string name="streamingclient_start">Start/Stop Streaming</string>
+    <string name="streamingclient_flash">Flash</string>
+    <string name="streamingclient_camera">Camera</string>
+    <string name="streamingclient_video">Video Settings</string>
+    <string name="streamingclient_save">OK</string>
+    <string name="streamingclient_username">Username</string>
+    <string name="streamingclient_password">Password</string>
+    <string name="streamingclient_uri">URI</string>
+    <string name="streamingclient_password_hint">Leave empty if not needed</string>
+    <string name="streamingclient_username_hint">Leave empty if not needed</string>
+    <string name="streamingclient_default_bitrate">0 kbps</string>
+    <string name="streamingclient_default_stream">rtsp://wowzaipaddress:1935/live/test.stream</string>
 </resources>

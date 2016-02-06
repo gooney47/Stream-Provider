@@ -1,0 +1,112 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/streamingclient_server_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="visible" >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/bg"
+        android:padding="14dp" >
+
+        <TableLayout
+            android:id="@+id/streamingclient_table"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/streamingclient_indicationUri"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:paddingRight="10dp"
+                    android:text="@string/streamingclient_uri"
+                    android:textColor="@android:color/white" />
+
+                <EditText
+                    android:id="@+id/streamingclient_uri"
+                    style="@style/EditText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="2"
+                    android:layout_margin="0dp"
+                    android:inputType="textUri"
+                    android:singleLine="true"
+                    android:text="@string/streamingclient_default_stream" >
+                </EditText>
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/streamingclient_indicationUsername"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:paddingRight="10dp"
+                    android:text="@string/streamingclient_username"
+                    android:textColor="@android:color/white" />
+
+                <EditText
+                    android:id="@+id/streamingclient_username"
+                    style="@style/EditText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="2"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:text="@string/streamingclient_username_hint" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/streamingclient_textView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:paddingRight="10dp"
+                    android:singleLine="true"
+                    android:text="@string/streamingclient_password"
+                    android:textColor="@android:color/white" />
+
+                <EditText
+                    android:id="@+id/streamingclient_password"
+                    style="@style/EditText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="2"
+                    android:inputType="textVisiblePassword"
+                    android:singleLine="true"
+                    android:hint="@string/streamingclient_password_hint" />
+            </TableRow>
+        </TableLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/streamingclient_table"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/streamingclient_video"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/streamingclient_video" />
+            
+            <Button
+                android:id="@+id/streamingclient_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/streamingclient_save" />
+            
+        </LinearLayout>
+    </RelativeLayout>
+
+</FrameLayout>

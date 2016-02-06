@@ -21,7 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.example.stream_provider.streaming.StreamingTest;
+import com.example.stream_provider.streaming.*;
 
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
         //Start streaming test
         else if (id == R.id.action_teststreaming) {
-            Intent intent = new Intent(this, StreamingTest.class);
+            Intent intent = new Intent(this, StreamingClient.class);
             startActivity(intent);
             return true;
         }
