@@ -150,9 +150,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             askForUsername(true);
             return true;
         }
-        //Start streaming test
-        else if (id == R.id.action_teststreaming) {
+        //Start streaming test 1
+        else if (id == R.id.action_teststreaming1) {
             Intent intent = new Intent(this, StreamingClient.class);
+            startActivity(intent);
+            return true;
+        }
+        //Start streaming test 2
+        else if (id == R.id.action_teststreaming2) {
+            Intent intent = new Intent(this, StreamingTest.class);
             startActivity(intent);
             return true;
         }

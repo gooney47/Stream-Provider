@@ -8,8 +8,13 @@
         android:title="@string/action_changeusername"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_teststreaming"
+        android:id="@+id/action_teststreaming1"
         android:orderInCategory="200"
-        android:title="@string/action_streamingtest"
+        android:title="@string/action_streamingtest1"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_teststreaming2"
+        android:orderInCategory="200"
+        android:title="@string/action_streamingtest2"
         app:showAsAction="never" />
 </menu>

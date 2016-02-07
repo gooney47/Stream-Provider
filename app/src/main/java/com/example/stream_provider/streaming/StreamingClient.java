@@ -146,7 +146,7 @@ OnCheckedChangeListener {
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.start:
+		case R.id.streamingclient_start:
 			mLayoutServerSettings.setVisibility(View.GONE);
 			toggleStream();
 			break;
