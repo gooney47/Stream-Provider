@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <service android:name="net.majorkernelpanic.streaming.rtsp.RtspServer"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -27,12 +29,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".streaming.StreamingTest"
+            android:name=".streaming.StreamingSession"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
             android:name=".streaming.StreamingClient"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+            android:name=".streaming.StreamingServer"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>

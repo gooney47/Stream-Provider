@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Stream-Provider</string>
     <string name="action_changeusername">Change Username</string>
-    <string name="action_streamingtest1">Test streaming 1</string>
-    <string name="action_streamingtest2">Test streaming 2</string>
+    <string name="action_streaming_client">Test streaming-client</string>
+    <string name="action_streaming_session">Test streaming-session</string>
+    <string name="action_streaming_server">Test streaming-server</string>
 
     <string name="start">Start</string>
     <string name="stop">Stop</string>
@@ -18,5 +19,5 @@
     <string name="streamingclient_password_hint">Leave empty if not needed</string>
     <string name="streamingclient_username_hint">Leave empty if not needed</string>
     <string name="streamingclient_default_bitrate">0 kbps</string>
-    <string name="streamingclient_default_stream">rtsp://wowzaipaddress:1935/live/test.stream</string>
+    <string name="streamingclient_default_stream">rtsp://192.168.1.212:1935/live/test.stream</string>
 </resources>

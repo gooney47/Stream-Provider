@@ -26,7 +26,7 @@ import com.example.stream_provider.R;
  * A straightforward example of how to stream AMR and H.263 to some public IP using libstreaming.
  * Note that this example may not be using the latest version of libstreaming !
  */
-public class StreamingTest extends Activity implements OnClickListener, Session.Callback, SurfaceHolder.Callback {
+public class StreamingSession extends Activity implements OnClickListener, Session.Callback, SurfaceHolder.Callback {
 
     private final static String TAG = "MainActivity";
 
@@ -145,7 +145,7 @@ public class StreamingTest extends Activity implements OnClickListener, Session.
     /** Displays a popup to report the eror to the user */
     private void logError(final String msg) {
         final String error = (msg == null) ? "Error unknown" : msg;
-        AlertDialog.Builder builder = new AlertDialog.Builder(StreamingTest.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(StreamingSession.this);
         builder.setMessage(error).setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {}
         });

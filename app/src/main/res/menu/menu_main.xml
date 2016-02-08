@@ -8,13 +8,18 @@
         android:title="@string/action_changeusername"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_teststreaming1"
+        android:id="@+id/action_streaming_client"
         android:orderInCategory="200"
-        android:title="@string/action_streamingtest1"
+        android:title="@string/action_streaming_client"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_teststreaming2"
-        android:orderInCategory="200"
-        android:title="@string/action_streamingtest2"
+        android:id="@+id/action_streaming_session"
+        android:orderInCategory="202"
+        android:title="@string/action_streaming_session"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_streaming_server"
+        android:orderInCategory="201"
+        android:title="@string/action_streaming_server"
         app:showAsAction="never" />
 </menu>
